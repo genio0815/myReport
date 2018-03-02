@@ -1,4 +1,4 @@
-Package: regionReport
+Package: myReport
 Type: Package
 Title: Generate HTML or PDF reports for a set of genomic regions or DESeq2/edgeR results
 Version: 1.13.2
