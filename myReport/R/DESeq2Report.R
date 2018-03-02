@@ -247,6 +247,7 @@ DESeq2Report <- function(dds, project = "", intgroup, colors = NULL, res = NULL,
             res <- file.path(tmpdir, outdir, paste0(output, '.html'))
             unlink(paste0(output, '.md'))
         } else {
+	    print("############################# ALEX ##############################")
             res <- render(paste0(output, '.Rmd'), output_format,
                 clean = .advanced_argument('clean', TRUE, ...))
         }
