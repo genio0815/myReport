@@ -1,0 +1,50 @@
+pkgVer <- function(pkg) {
+    if (!exists("meta") || is.null(meta)) meta <- packageDescription(pkg)
+    ver <- meta$Version
+    paste0('https://github.com/leekgroup/', pkg, ' - R package version ', ver)
+}
+c(
+    bibentry(bibtype = 'article', 
+        author = personList(
+            as.person("Leonardo Collado-Torres"),
+            as.person("Andrew E. Jaffe"),
+            as.person("Jeffrey T. Leek")
+        ),
+        title = 'regionReport: Interactive reports for region-level and feature-level genomic analyses [version2; referees: 2 approved, 1 approved with reservations]',
+        journal = 'F1000Research', year = 2016,
+        doi = '10.12688/f1000research.6379.2',
+        url = 'http://f1000research.com/articles/4-105/v2',
+        volume = '4',
+        pages = '105'
+    ),
+    bibentry(bibtype="article",
+        title = "Flexible expressed region analysis for RNA-seq with derfinder",
+        author = personList(
+            as.person("Leonardo Collado-Torres"),
+            as.person("Abhinav Nellore"),
+            as.person("Alyssa C. Frazee"),
+            as.person("Christopher Wilks"),
+            as.person("Michael I. Love"),
+            as.person("Ben Langmead"),
+            as.person("Rafael A. Irizarry"),
+            as.person("Jeffrey T. Leek"),
+            as.person("Andrew E. Jaffe")
+        ),
+        year = 2017,
+        journal = "Nucl. Acids Res.",
+        doi = "10.1093/nar/gkw852",
+        url = "http://nar.oxfordjournals.org/content/early/2016/09/29/nar.gkw852"
+    ),
+    bibentry(bibtype="manual",
+        title = "regionReport: Generate HTML or PDF reports for a set of genomic regions or DESeq2/edgeR results",
+        author = personList(
+            as.person("Leonardo Collado-Torres"),
+            as.person("Andrew E. Jaffe"),
+            as.person("Jeffrey T. Leek")
+        ),
+        year = 2017,
+        url = "http://www.bioconductor.org/packages/regionReport",
+        note = pkgVer('regionReport'),
+        doi = '10.18129/B9.bioc.regionReport'
+    )
+)

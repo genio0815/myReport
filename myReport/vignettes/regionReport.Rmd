@@ -1,0 +1,414 @@
+---
+title: "Introduction to regionReport"
+author: 
+  - name: Leonardo Collado-Torres
+    affiliation:
+    - &libd Lieber Institute for Brain Development, Johns Hopkins Medical Campus
+    - &ccb Center for Computational Biology, Johns Hopkins University
+    email: leo.collado@libd.org
+date: "`r doc_date()`"
+package: "`r pkg_ver('regionReport')`"
+output: 
+  BiocStyle::html_document:
+    self_contained: yes
+    toc: true
+    toc_float: true
+    toc_depth: 3
+    code_folding: show
+vignette: >
+  %\VignetteIndexEntry{Introduction to regionReport}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}  
+---
+
+# Basics
+
+## Install `r Biocpkg('regionReport')`
+
+`R` is an open-source statistical environment which can be easily modified to enhance its functionality via packages. `r Biocpkg('regionReport')` is a `R` package available via the [Bioconductor](http://bioconductor/packages/regionReport) repository for packages. `R` can be installed on any operating system from [CRAN](https://cran.r-project.org/) after which you can install `r Biocpkg('regionReport')` by using the following commands in your `R` session:
+
+```{r 'installDer', eval = FALSE}
+## try http:// if https:// URLs are not supported
+source("https://bioconductor.org/biocLite.R")
+biocLite("regionReport")
+
+## Check that you have a valid Bioconductor installation
+biocValid()
+```
+
+## Required knowledge
+
+`r Biocpkg('regionReport')` is based on many other packages and in particular in those that have implemented the infrastructure needed for dealing with RNA-seq data. That is, packages like `r Biocpkg('GenomicFeatures')` that allow you to import the data and `r Biocpkg('DESeq2')` for generating differential expression results. A `r Biocpkg('regionReport')` user is not expected to deal with those packages directly.
+
+If you are asking yourself the question "Where do I start using Bioconductor?" you might be interested in [this blog post](http://lcolladotor.github.io/2014/10/16/startBioC/#.VkOKbq6rRuU).
+
+## Asking for help
+
+As package developers, we try to explain clearly how to use our packages and in which order to use the functions. But `R` and `Bioconductor` have a steep learning curve so it is critical to learn where to ask for help. The blog post quoted above mentions some but we would like to highlight the [Bioconductor support site](https://support.bioconductor.org/) as the main resource for getting help: remember to use the `regionReport` tag and check [the older posts](https://support.bioconductor.org/t/regionReport/). Other alternatives are available such as creating GitHub issues and tweeting. However, please note that if you want to receive help you should adhere to the [posting guidelines](http://www.bioconductor.org/help/support/posting-guide/). It is particularly critical that you provide a small reproducible example and your session information so package developers can track down the source of the error.
+
+## Citing `r Biocpkg('regionReport')`
+
+We hope that `r Biocpkg('regionReport')` will be useful for your research. Please use the following information to cite the package and the overall approach. Thank you!
+
+```{r 'citation'}
+## Citation info
+citation('regionReport')
+```
+
+# HTML reports for a set differential region results
+
+```{r vignetteSetup, echo = FALSE, message = FALSE, warning = FALSE}
+## Track time spent on making the vignette
+startTimeVignette <- Sys.time()
+
+## Bib setup
+library('knitcitations')
+
+## Load knitcitations with a clean bibliography
+cleanbib()
+cite_options(hyperlink = 'to.doc', citation_format = 'text', style = 'html')
+# Note links won't show for now due to the following issue
+# https://github.com/cboettig/knitcitations/issues/63
+
+## Write bibliography information
+bib <- c(knitcitations = citation('knitcitations'), 
+    derfinder = citation('derfinder')[1], 
+    regionReport = citation('regionReport')[1],
+    knitrBootstrap = citation('knitrBootstrap'),
+    BiocStyle = citation('BiocStyle'),
+    ggbio = citation('ggbio'),
+    ggplot2 = citation('ggplot2'),
+    knitr = citation('knitr')[3],
+    rmarkdown = citation('rmarkdown'),
+    DT = citation('DT'),
+    R = citation(),
+    IRanges = citation('IRanges'),
+    devtools = citation('devtools'),
+    GenomeInfoDb = RefManageR::BibEntry(bibtype = 'manual',
+        key = 'GenomeInfoDb',
+        author = 'Sonali Arora and Martin Morgan and Marc Carlson and H. Pagès',
+        title = "GenomeInfoDb: Utilities for manipulating chromosome and other 'seqname' identifiers",
+        year = 2017, doi = '10.18129/B9.bioc.GenomeInfoDb'),
+    GenomicRanges = citation('GenomicRanges'),
+    biovizBase = citation('biovizBase'),
+    TxDb.Hsapiens.UCSC.hg19.knownGene = citation('TxDb.Hsapiens.UCSC.hg19.knownGene'),
+    derfinderPlot = citation('derfinderPlot')[1],
+    grid = citation('grid'),
+    gridExtra = citation('gridExtra'),
+    mgcv = citation('mgcv'),
+    RColorBrewer = citation('RColorBrewer'),
+    whikser = citation('whisker'),
+    bumphunter = citation('bumphunter')[1],
+    pheatmap = citation('pheatmap'),
+    DESeq2 = citation('DESeq2'),
+    edgeR1 = citation('edgeR')[1],
+    edgeR2 = citation('edgeR')[2],
+    edgeR6 = RefManageR::BibEntry('inbook', key = 'edgeR6',
+        author = 'Chen, Yunshun and Lun, Aaron T. L. and Smyth, Gordon K.', 
+        title = 'Differential expression analysis of complex RNA-seq experiments using edgeR',
+        booktitle = 'Statistical Analysis of Next Generation Sequencing Data', 
+        year = 2014,
+        editor = 'Datta, Somnath and Nettleton, Dan', publisher = 'Springer',
+        location = 'New York', pages = '51-74'),
+    DEFormats = citation('DEFormats')
+)
+
+write.bibtex(bib, file = 'regionReportRef.bib')
+```
+
+
+`r Biocpkg('regionReport')` `r citep(bib[['regionReport']])` creates HTML or PDF reports for a set of genomic regions such as `r Biocpkg('derfinder')` `r citep(bib[['derfinder']])` results or for feature-level analyses performed with `r Biocpkg('DESeq2')` `r citep(bib[['DESeq2']])` or `r Biocpkg('edgeR')` `r citep(bib[[c('edgeR1', 'edgeR2', 'edgeR6')]])`. The HTML reports are styled with `r CRANpkg('rmarkdown')` `r citep(bib[['rmarkdown']])` by default but can optionally be styled with `r CRANpkg('knitrBootstrap')` `r citep(bib[['knitrBootstrap']])`.
+
+
+This package includes a basic exploration for a general set of genomic regions which can be easily customized to include the appropriate conclusions and/or further exploration of the results. Such a report can be generated using `renderReport()`. `r Biocpkg('regionReport')` has a separate template for running a basic exploration analysis of `r Biocpkg('derfinder')` 
+results by using `derfinderReport()`. `derfinderReport()` is specific to single base-level approach `r Biocpkg('derfinder')` results. A third template is included for exploring `r Biocpkg('DESeq2')` or `r Biocpkg('edgeR')` differential expression results.
+
+All reports are written in [R Markdown](http://rmarkdown.rstudio.com/)
+format and include all the code for making the plots and explorations in the report itself. For all templates, `r Biocpkg('regionReport')` relies on
+`r CRANpkg('knitr')` `r citep(bib[['knitr']])`, `r CRANpkg('rmarkdown')` 
+`r citep(bib[['rmarkdown']])`, `DT` `r citep(bib[['DT']])` and optionally `r CRANpkg('knitrBootstrap')` 
+`r citep(bib[['knitrBootstrap']])` for generating the report. The reports can be either in HTML or PDF format and can be easily customized.
+
+# Using `r Biocpkg('regionReport')` for `r Biocpkg('DESeq2')` results
+
+The plots in `r Biocpkg('regionReport')` for exploring `r Biocpkg('DESeq2')` are powered by `r CRANpkg('ggplot2')` `r citep(bib[['ggplot2']])` and `r CRANpkg('pheatmap')` `r citep(bib[['pheatmap']])`.
+
+
+## Examples
+
+The `r Biocpkg('regionReport')` supplementary website [regionReportSupp](http://leekgroup.github.io/regionReportSupp/) has examples of using `r Biocpkg('regionReport')` with `r Biocpkg('DESeq2')` results. In particular, please look at [DESeq2.html](http://leekgroup.github.io/regionReportSupp/DESeq2.html) which has the code for generating some `r Biocpkg('DESeq2')` results based on the `r Biocpkg('DESeq2')` vignette. Then it uses those results to create HTML and PDF versions of the same report. The resulting reports are available in the following locations:
+
+* [HTML version](http://leekgroup.github.io/regionReportSupp/DESeq2-example/index.html)
+* [PDF version](http://leekgroup.github.io/regionReportSupp/DESeq2-example/DESeq2Report.pdf)
+
+Note that in both examples we changed the `r CRANpkg('ggplot2')` theme to `theme_bw()`. Also, in the PDF version we used the option `device = 'pdf'` instead of the default `device = 'png'` in `DESeq2Report()` since PDF figures are more appropriate for PDF reports: they look better than PNG figures.
+
+If you want to create a similar HTML report as the one linked in this section, simply run `example('DESeq2Report', 'regionReport', ask=FALSE)`. The only difference will be the `r CRANpkg('ggplot2')` theme for the plots.
+
+# Using `r Biocpkg('regionReport')` for `r Biocpkg('edgeR')` results
+
+`r Biocpkg('regionReport')` has the `edgeReport()` function that takes as input a `DGEList` object and the results from the differential expression analysis using `r Biocpkg('edgeR')`. `edgeReport()` internally uses `r Biocpkg('DEFormats')` to convert the results to `r Biocpkg('DESeq2')`'s format and then uses `DESeqReport()` to create the final report. The report looks nearly the same whether you performed the differential expression analysis with `r Biocpkg('DESeq2')` or `r Biocpkg('edgeR')` in order to make more homogenous the exploratory data analysis step.
+
+
+## Examples
+
+The `r Biocpkg('regionReport')` supplementary website [regionReportSupp](http://leekgroup.github.io/regionReportSupp/) has examples of using `r Biocpkg('regionReport')` with `r Biocpkg('edgeR')` results. In particular, please look at [edgeR.html](http://leekgroup.github.io/regionReportSupp/edgeR.html) which has the code for generating some random data with `r Biocpkg('DEFormats')` and performing the differential expression analysis with `r Biocpkg('edgeR')`. Then it uses those results to create HTML and PDF versions of the same report. The resulting reports are available in the following locations:
+
+* [HTML version](http://leekgroup.github.io/regionReportSupp/edgeR-example/index.html)
+* [PDF version](http://leekgroup.github.io/regionReportSupp/edgeR-example/edgeReport.pdf)
+
+Note that in both examples we changed the `r CRANpkg('ggplot2')` theme to `theme_linedraw()`. Also, in the PDF version we used the option `device = 'pdf'` instead of the default `device = 'png'` in `edgeReport()` since PDF figures are more appropriate for PDF reports: they look better than PNG figures.
+
+If you want to create a similar HTML report as the one linked in this section, simply run `example('edgeReport', 'regionReport', ask=FALSE)`. The only difference will be the `r CRANpkg('ggplot2')` theme for the plots and the amount of data simulated with `r Biocpkg('DEFormats')`.
+
+
+
+# Using `r Biocpkg('regionReport')` for region results
+
+The plots in `r Biocpkg('regionReport')` for region reports are powered by `r Biocpkg('derfinderPlot')` `r citep(bib[['derfinderPlot']])`, `r Biocpkg('ggbio')` `r citep(bib[['ggbio']])`, and `r CRANpkg('ggplot2')` `r citep(bib[['ggplot2']])`.
+
+## Examples
+
+The `r Biocpkg('regionReport')` supplementary website [regionReportSupp](http://leekgroup.github.io/regionReportSupp/) has examples of using `r Biocpkg('regionReport')` with results from `r Biocpkg('DiffBind')` and `r Biocpkg('derfinder')`. Included as a vignette, this package also has an example using a small data set derived from `r Biocpkg('bumphunter')`. These represent different uses of `r Biocpkg('regionReport')` for results from ChIP-seq, methylation, and RNA-seq data. In particular, the `r Biocpkg('DiffBind')` example illustrates how to expand a basic report created with `renderReport()`.
+
+## General case
+
+For a general use case, you first have to identify a set of genomic regions of interest and store it as a `GRanges` object. In a typical workflow you will have some variables measured for each of the regions, such as p-values and scores. `renderReport()` uses the set of regions and three main arguments:
+
+* `pvalueVars`: this is a character vector (named optionally) with the names of the variables that are bound between 0 and 1, such as p-values. For each of these variables, `renderReport()` explores the distribution by chromosome, the overall distribution, and makes a table with commonly used cutoffs.
+* `densityVars`: is another character vector (named optionally) with another set of variables you wish to explore by making density graphs. This is commonly used for scores and other similar numerical variables.
+* `significantVar`: is a logical vector separating the regions into by whether they are statistically significant. For example, this information is used to explore the width of all the regions and compare it the significant ones.
+
+Other parameters control the name of the report, where it'll be located, the transcripts database used to annotate the nearest genes, graphical parameters, etc.
+
+Here is a short example of how to use `renderReport()`. Note that we are using regions produced by `r Biocpkg('derfinder')` just for convenience sake. You can also run this example by using `example('renderReport', 'regionReport', ask=FALSE)`.
+
+```{r, eval = FALSE}
+## Load derfinder
+library('derfinder')
+regions <- genomeRegions$regions
+
+## Assign chr length
+library('GenomicRanges')
+seqlengths(regions) <- c('chr21' = 48129895)
+
+## The output will be saved in the 'derfinderReport-example' directory
+dir.create('renderReport-example', showWarnings = FALSE, recursive = TRUE)
+
+## Generate the HTML report
+report <- renderReport(regions, 'Example run', pvalueVars = c(
+    'Q-values' = 'qvalues', 'P-values' = 'pvalues'), densityVars = c(
+    'Area' = 'area', 'Mean coverage' = 'meanCoverage'), 
+    significantVar = regions$qvalues <= 0.05, nBestRegions = 20,
+    outdir = 'renderReport-example')
+```
+
+For `r Biocpkg('derfinder')` results created via the expressed regions-level approach you can use `renderReport()` to explore the results. If you use `r Biocpkg('DESeq2')` to perform the differential expression analysis of the expressed regions you can then use `DESeq2Report()`.
+
+
+## `r Biocpkg('derfinder')` single base-level case
+
+### Run `r Biocpkg('derfinder')`
+
+Prior to using `regionReport::derfinderReport()` you must use `r Biocpkg('derfinder')` to analyze a specific data set. While there are many ways to do so, we recommend using __analyzeChr()__ with the same _prefix_ argument. Then merging the results with __mergeResults()__. This is the recommended pipeline for the single base-level approach.
+
+Below, we run `r Biocpkg('derfinder')` for the example data included in the package. The steps are:
+
+1. Load derfinder
+1. Create a directory where we'll store the results
+1. Generate the pre-requisites for the models to use with the example data
+1. Generate the statistical models
+1. Analyze the example data for chr21
+1. Merge the results (only one chr in this case, but in practice there'll be more)
+
+```{r loadDerfinder}
+## Load derfinder
+library('derfinder')
+
+## The output will be saved in the 'report' directory
+dir.create('report', showWarnings = FALSE, recursive = TRUE)
+```
+
+The following code runs `r Biocpkg('derfinder')`.
+
+```{r runDerfinderFake, eval=FALSE}
+## Save the current path
+initialPath <- getwd()
+setwd(file.path(initialPath, 'report'))
+
+## Generate output from derfinder
+
+## Collapse the coverage information
+collapsedFull <- collapseFullCoverage(list(genomeData$coverage), 
+verbose=TRUE)
+
+## Calculate library size adjustments
+sampleDepths <- sampleDepth(collapsedFull, probs=c(0.5), nonzero=TRUE, 
+verbose=TRUE)
+
+## Build the models
+group <- genomeInfo$pop
+adjustvars <- data.frame(genomeInfo$gender)
+models <- makeModels(sampleDepths, testvars=group, adjustvars=adjustvars)
+
+## Analyze chromosome 21
+analysis <- analyzeChr(chr='21', coverageInfo=genomeData, models=models, 
+cutoffFstat=1, cutoffType='manual', seeds=20140330, groupInfo=group, 
+mc.cores=1, writeOutput=TRUE, returnOutput=TRUE)
+
+## Save the stats options for later
+optionsStats <- analysis$optionsStats
+
+## Change the directory back to the original one
+setwd(initialPath)
+```
+
+For convenience, we have included the `r Biocpkg('derfinder')` results as part of 
+`r Biocpkg('regionReport')`. Note that the above functions are routinely checked as part
+of `r Biocpkg('derfinder')`.
+
+
+```{r runDerfinderReal}
+## Copy previous results
+file.copy(system.file(file.path('extdata', 'chr21'), package='derfinder', 
+mustWork=TRUE), 'report', recursive=TRUE)
+```
+
+Next, proceed to merging the results.
+
+```{r mergeResults}
+## Merge the results from the different chromosomes. In this case, there's 
+## only one: chr21
+mergeResults(chrs = 'chr21', prefix = 'report',
+    genomicState = genomicState$fullGenome)
+    
+## Load optionsStats
+load(file.path('report', 'chr21', 'optionsStats.Rdata'))
+```
+
+
+
+### Create report
+
+Once the `r Biocpkg('derfinder')` output has been generated and merged, use
+__derfinderReport()__ to create the HTML report.
+
+
+```{r loadLib, message=FALSE}
+## Load derfindeReport
+library('regionReport')
+```
+
+
+```{r createReport, warning = FALSE}
+## Generate the HTML report
+report <- derfinderReport(prefix='report', browse=FALSE,
+    nBestRegions=15, makeBestClusters=TRUE, outdir='html',
+    fullCov=list('21'=genomeDataRaw$coverage), optionsStats=optionsStats)
+```
+
+Once the output is generated, you can browse the report from `R` using 
+__browseURL()__ as shown below.
+
+```{r vignetteBrowse, eval=FALSE}
+## Browse the report
+browseURL(report)
+```
+
+### Notes
+
+Note that the reports require an active Internet connection to render correctly.
+
+The report is self-explanatory and will change some of the text depending on the
+input options.
+
+If the report is taking too long to compile (say more than 3 hours), you might
+want to consider setting _nBestCluters_ to a small number or even set 
+_makeBestClusters_ to `FALSE`.
+
+# Reproducibility
+
+This package was made possible thanks to:
+
+* R `r citep(bib[['R']])`
+* `r Biocpkg('BiocStyle')` `r citep(bib[['BiocStyle']])`
+* `r Biocpkg('biovizBase')` `r citep(bib[['biovizBase']])`
+* `r Biocpkg('bumphunter')` `r citep(bib[['bumphunter']])`
+* `r Biocpkg('DEFormats')` `r citep(bib[['DEFormats']])`
+* `r Biocpkg('derfinder')` `r citep(bib[['derfinder']])`
+* `r Biocpkg('derfinderPlot')` `r citep(bib[['derfinderPlot']])`
+* `r Biocpkg('DESeq2')` `r citep(bib[['DESeq2']])`
+* `r CRANpkg('devtools')` `r citep(bib[['devtools']])`
+* `r CRANpkg('DT')` `r citep(bib[['DT']])`
+* `r Biocpkg('edgeR')` `r citep(bib[[c('edgeR1', 'edgeR2', 'edgeR6')]])`
+* `r Biocpkg('GenomeInfoDb')` `r citep(bib[['GenomeInfoDb']])`
+* `r Biocpkg('GenomicRanges')` `r citep(bib[['GenomicRanges']])`
+* `r Biocpkg('ggbio')` `r citep(bib[['ggbio']])`
+* `r CRANpkg('ggplot2')` `r citep(bib[['ggplot2']])`
+* `r CRANpkg('grid')` `r citep(bib[['grid']])`
+* `r CRANpkg('gridExtra')` `r citep(bib[['gridExtra']])`
+* `r Biocpkg('IRanges')` `r citep(bib[['IRanges']])`
+* `r CRANpkg('knitcitations')` `r citep(bib[['knitcitations']])`
+* `r CRANpkg('knitr')` `r citep(bib[['knitr']])`
+* `r CRANpkg('knitrBootstrap')` `r citep(bib[['knitrBootstrap']])`
+* `r CRANpkg('mgcv')` `r citep(bib[['mgcv']])`
+* `r CRANpkg('pheatmap')` `r citep(bib[['pheatmap']])`
+* `r CRANpkg('RColorBrewer')` `r citep(bib[['RColorBrewer']])`
+* `r CRANpkg('rmarkdown')` `r citep(bib[['rmarkdown']])`
+* `r Biocannopkg('TxDb.Hsapiens.UCSC.hg19.knownGene')` `r citep(bib[['TxDb.Hsapiens.UCSC.hg19.knownGene']])`
+* `r CRANpkg('whisker')` `r citep(bib[['whisker']])`
+
+
+Code for creating the vignette
+
+```{r createVignette, eval=FALSE}
+## Create the vignette
+library('rmarkdown')
+system.time(render('regionReport.Rmd', 'BiocStyle::html_document'))
+
+## Extract the R code
+library('knitr')
+knit('regionReport.Rmd', tangle = TRUE)
+```
+
+```{r createVignette2}
+## Clean up
+file.remove('regionReportRef.bib')
+unlink('report', recursive = TRUE)
+```
+
+Date the vignette was generated.
+
+```{r vignetteReproducibility1, echo=FALSE}
+## Date the report was generated
+Sys.time()
+```
+
+Wallclock time spent generating the vignette.
+
+```{r vignetteReproducibility2, echo=FALSE}
+## Processing time in seconds
+totalTimeVignette <- diff(c(startTimeVignette, Sys.time()))
+round(totalTimeVignette, digits=3)
+```
+
+`R` session information.
+
+```{r vignetteReproducibility3, echo=FALSE}
+## Session info
+library('devtools')
+options(width = 120)
+session_info()
+```
+
+# Bibliography
+
+This vignette was generated using `r CRANpkg('BiocStyle')` `r citep(bib[['BiocStyle']])`
+with `r CRANpkg('knitr')` `r citep(bib[['knitr']])` and `r CRANpkg('rmarkdown')` `r citep(bib[['rmarkdown']])` running behind the scenes.
+
+Citations made with `r CRANpkg('knitcitations')` `r citep(bib[[1]])`.
+
+```{r vignetteBiblio, results='asis', echo=FALSE, warning = FALSE, message = FALSE}
+## Print bibliography
+bibliography()
+```
