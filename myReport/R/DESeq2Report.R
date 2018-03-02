@@ -130,9 +130,8 @@
 #'
 #'
 
-
 DESeq2Report <- function(dds, project = "", intgroup, colors = NULL, res = NULL,
-    nBest = 500, nBestFeatures = 20, customCode = NULL,
+    nBest = 500, nBestFeatures = 20, customCode = NULL, contrasts,
     outdir = 'DESeq2Exploration', output = 'DESeq2Exploration',
     browse = interactive(), device = 'png', template = NULL, 
     searchURL = 'http://www.ncbi.nlm.nih.gov/gene/?term=', theme = NULL,
