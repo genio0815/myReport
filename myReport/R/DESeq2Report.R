@@ -140,22 +140,23 @@ DESeq2Report <- function(dds, project = "", intgroup, colors = NULL, res = NULL,
     ## Save start time for getting the total processing time
     startTime <- Sys.time()
     
-    
+    ############### my comments
     ## Check inputs
-    stopifnot(is(dds, 'DESeqDataSet'))
-    if (!"results" %in% mcols(mcols(dds))$type)
-        stop("couldn't find results. you should first run DESeq()")
-    if (!all(intgroup %in% names(colData(dds)))) 
-        stop("all variables in 'intgroup' must be columns of colData")
-    if(is.null(res)) {
-        ## Run results with default parameters
-        res <- results(dds)
-    } else {
-        stopifnot(is(res, 'DESeqResults'))
-        stopifnot(identical(nrow(res), nrow(dds)))
-    }
-    stopifnot(is.null(searchURL) | length(searchURL) == 1)
-    if(!is.null(theme)) stopifnot(is(theme, c('theme', 'gg')))
+    # stopifnot(is(dds, 'DESeqDataSet'))
+    # if (!"results" %in% mcols(mcols(dds))$type)
+    #     stop("couldn't find results. you should first run DESeq()")
+    # if (!all(intgroup %in% names(colData(dds)))) 
+    #     stop("all variables in 'intgroup' must be columns of colData")
+    # if(is.null(res)) {
+    #     ## Run results with default parameters
+    #     res <- results(dds)
+    # } else {
+    #     stopifnot(is(res, 'DESeqResults'))
+    #     stopifnot(identical(nrow(res), nrow(dds)))
+    # }
+    # stopifnot(is.null(searchURL) | length(searchURL) == 1)
+    # if(!is.null(theme)) stopifnot(is(theme, c('theme', 'gg')))
+    #######################
         
 # @param software The name of the package used for performing the differential
 # expression analysis. Either \code{DESeq2}, \code{edgeR} or \code{other}
@@ -167,7 +168,10 @@ DESeq2Report <- function(dds, project = "", intgroup, colors = NULL, res = NULL,
     
 # @param dge A \link[edgeR]{DGEList} object.
     dge <- .advanced_argument('dge', NULL, ...)
-    if(isEdgeR) stopifnot(is(dge, 'DGEList'))
+    
+    ### my comments
+    #if(isEdgeR) stopifnot(is(dge, 'DGEList'))
+    ###
     
     ## Is there custom code?
     hasCustomCode <- !is.null(customCode)
