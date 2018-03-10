@@ -4,7 +4,7 @@ Title: Generate HTML or PDF reports for a set of genomic regions or DESeq2/edgeR
 Version: 1.0
 Date: 2018-03-03
 Authors@R: c(person("genio", "0815", role = c("aut", "cre"), email
-= "dechaMe@enpaz.edu")
+	= "dechaMe@enpaz.edu"))
 Description: Generate HTML or PDF reports to explore a set of regions such as
     the results from annotation-agnostic expression analysis of RNA-seq data at
     base-pair resolution performed by derfinder. You can also create reports for
