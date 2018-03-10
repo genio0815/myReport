@@ -238,8 +238,9 @@ DESeq2Report <- function(dds, project = "", intgroup, colors = NULL, res = NULL,
         outputIsHTML <- output_format %in% c('html_document',
             'knitrBootstrap::bootstrap_document', 'BiocStyle::html_document')
         if(!outputIsHTML) {
-            if(device == 'png') warning("You might want to switch the 'device' argument from 'png' to 'pdf' for better quality plots.")
-        }
+            #if(device == 'png') warning("You might want to switch the 'device' argument from 'png' to 'pdf' for better quality plots.")
+       	    device = 'pdf'
+	 }
     
         ## Check knitrBoostrap version
         knitrBootstrapFlag <- packageVersion('knitrBootstrap') < '1.0.0'
