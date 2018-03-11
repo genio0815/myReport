@@ -104,58 +104,65 @@ edgeReport <- function(dge, object, project = "", intgroup, colors = NULL,
     digits = 2, ...) {
     
     ## Check inputs
-    stopifnot(is(dge, 'DGEList'))
-    stopifnot(is(object, 'DGEExact') | is(object, 'DGELRT'))
-    if (is.null(object$table)) stop("Need to run exactTest or glmLRT first")
-    stopifnot(nrow(dge$counts) == nrow(object$table))
-    stopifnot(rownames(dge$counts) == rownames(object$table))
-    stopifnot(all(c('PValue', 'logCPM', 'logFC') %in% colnames(object$table)))
+    #stopifnot(is(dge, 'DGEList'))
+    #stopifnot(is(object, 'DGEExact') | is(object, 'DGELRT'))
+    #if (is.null(object$table)) stop("Need to run exactTest or glmLRT first")
+    #stopifnot(nrow(dge$counts) == nrow(object$table))
+    #stopifnot(rownames(dge$counts) == rownames(object$table))
+    #stopifnot(all(c('PValue', 'logCPM', 'logFC') %in% colnames(object$table)))
     
     ## Transform to DESeq2 format
-    dds <- as.DESeqDataSet(dge)
+    #dds <- as.DESeqDataSet(dge)
     
     ## Fake having created results
-    mcols(dds) <- DataFrame(pvalue = object$table$PValue)
-    mcols(mcols(dds)) <- DataFrame(type = 'results',
-        description = 'manual incomplete conversion from edgeR to DESeq2')
+    #mcols(dds) <- DataFrame(pvalue = object$table$PValue)
+    #mcols(mcols(dds)) <- DataFrame(type = 'results',
+    #    description = 'manual incomplete conversion from edgeR to DESeq2')
     
     ## Fix column names
-    colnames(object$table)[colnames(object$table) == 'PValue'] <- 'pvalue'
-    colnames(object$table)[colnames(object$table) == 'logFC'] <- 'log2FoldChange'
-    colnames(object$table)[colnames(object$table) == 'logCPM'] <- 'baseMean'
+    #colnames(object$table)[colnames(object$table) == 'PValue'] <- 'pvalue'
+    #colnames(object$table)[colnames(object$table) == 'logFC'] <- 'log2FoldChange'
+    #colnames(object$table)[colnames(object$table) == 'logCPM'] <- 'baseMean'
     
     ## Define res input
-    deseqRes <- DESeqResults(DataFrame(object$table))
+    #deseqRes <- DESeqResults(DataFrame(object$table))
     
     ## Use as default the logCPM (since it's renamed to baseMean)
-    if(!missing(filter)) {
-        if(is.character(filter) & length(filter) == 1) {
-            stopifnot(filter %in% colnames(object$table))
-            filter <- object$table[, filter]
-        }
-    }
-    
-    ## Obtain results
-    if(missing(filterFun)) {
-        deseqRes <- DESeq2:::pvalueAdjustment(deseqRes, 
-            independentFiltering = independentFiltering, filter = filter,
-            theta = theta, alpha = alpha, pAdjustMethod = pAdjustMethod)
-    } else {
-        deseqRes <- filterFun(deseqRes, filter = filter, alpha = alpha,
-            pAdjustMethod = pAdjustMethod)
-    }
-    ## Save alpha value
-    metadata(deseqRes)[["alpha"]] <- alpha
+    # if(!missing(filter)) {
+    #     if(is.character(filter) & length(filter) == 1) {
+    #         stopifnot(filter %in% colnames(object$table))
+    #         filter <- object$table[, filter]
+    #     }
+    # }
+    # 
+    # ## Obtain results
+    # if(missing(filterFun)) {
+    #     deseqRes <- DESeq2:::pvalueAdjustment(deseqRes, 
+    #         independentFiltering = independentFiltering, filter = filter,
+    #         theta = theta, alpha = alpha, pAdjustMethod = pAdjustMethod)
+    # } else {
+    #     deseqRes <- filterFun(deseqRes, filter = filter, alpha = alpha,
+    #         pAdjustMethod = pAdjustMethod)
+    # }
+    # ## Save alpha value
+    # metadata(deseqRes)[["alpha"]] <- alpha
     
     ## Call used
     theCall <- match.call()
     
+    myReport::DESeq2Report(dds, project = project, intgroup = intgroup, colors = colors,
+                           res = NULL, nBest = nBest, nBestFeatures = nBestFeatures,
+                           customCode = customCode, outdir = outdir, output = output,
+                           browse = browse, device = device, template = template,
+                           searchURL = searchURL, theme = theme, digits = digits,
+                           software = 'edgeR', theCall = theCall, dge = dge, ...)
+    
     ## Create report
-    DESeq2Report(dds, project = project, intgroup = intgroup, colors = colors,
-        res = deseqRes, nBest = nBest, nBestFeatures = nBestFeatures,
-        customCode = customCode, outdir = outdir, output = output,
-        browse = browse, device = device, template = template,
-        searchURL = searchURL, theme = theme, digits = digits,
-        software = 'edgeR', theCall = theCall, dge = dge, ...)
+    # myReport::DESeq2Report(dds, project = project, intgroup = intgroup, colors = colors,
+    #     res = deseqRes, nBest = nBest, nBestFeatures = nBestFeatures,
+    #     customCode = customCode, outdir = outdir, output = output,
+    #     browse = browse, device = device, template = template,
+    #     searchURL = searchURL, theme = theme, digits = digits,
+    #     software = 'edgeR', theCall = theCall, dge = dge, ...)
     
 }
