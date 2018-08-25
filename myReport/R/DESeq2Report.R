@@ -206,7 +206,6 @@ DESeq2Report <- function(dds, project = "", intgroup, colors = NULL, res = NULL,
     ## Write bibliography information
     bib <- c(
         knitcitations = citation('knitcitations'), 
-        regionReport = citation('regionReport')[1],
         DT = citation('DT'), 
         ggplot2 = citation('ggplot2'),
         knitr = citation('knitr')[3],
